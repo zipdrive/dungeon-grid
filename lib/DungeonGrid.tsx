@@ -179,6 +179,16 @@ export type DungeonGridProps<Keys> = {
      * True if row labels should be disabled.
      */
     disableRowLabels?: boolean,
+
+    /**
+     * Callback function for when the user navigates past the right edge of the grid.
+     */
+    onAddColumn?: () => any,
+
+    /**
+     * Callback function for when the user navigates below the bottom edge of the grid.
+     */
+    onAddRow?: () => any,
 };
 
 export default function DungeonGrid<Keys>(props: DungeonGridProps<Keys>): React.JSX.Element {
@@ -188,8 +198,85 @@ export default function DungeonGrid<Keys>(props: DungeonGridProps<Keys>): React.
     const [selections, setSelections] = React.useState<{ rowIndex: number, columnIndex: number, rowSpan: number, columnSpan: number }[]>([]);
     const [editCell, setEditCell] = React.useState<{ rowIndex: number, columnId: keyof Keys } | null>(null);
 
+    // Clamp cursor to bounds of grid
+    React.useEffect(() => {
+        setCursor(({ rowIndex, columnIndex }) => {
+            return {
+                rowIndex: Math.max(0, Math.min(rowIndex, props.rows.length)),
+                columnIndex
+            };
+        })
+    }, [props.rows.length]);
+    React.useEffect(() => {
+        setCursor(({ rowIndex, columnIndex }) => {
+            return {
+                rowIndex,
+                columnIndex: Math.max(0, Math.min(columnIndex, props.columns.length))
+            };
+        })
+    }, [props.columns.length]);
+
+    /**
+     * Shifts the cursor/selection in the grid.
+     */
+    const onKeyDown = React.useCallback((e: React.KeyboardEvent) => {
+        if (e.key === "ArrowUp") {
+            setCursor(({ rowIndex, columnIndex }) => {
+                return { 
+                    rowIndex: Math.max(0, rowIndex - 1),
+                    columnIndex
+                };
+            });
+        } else if (e.key === "ArrowDown" || e.key === "Enter") {
+            setCursor(({ rowIndex, columnIndex }) => {
+                if (props.onAddRow) {
+                    // Create new rows as needed
+                    if (rowIndex + 1 >= props.rows.length) {
+                        props.onAddRow();
+                    }
+                    return { 
+                        rowIndex: rowIndex + 1,
+                        columnIndex
+                    };
+                } else {
+                    // Block movement past the edge of the grid
+                    return { 
+                        rowIndex: Math.min(Math.max(0, props.rows.length - 1), rowIndex + 1),
+                        columnIndex
+                    };
+                }
+            });
+        } else if (e.key === "ArrowLeft") {
+            setCursor(({ rowIndex, columnIndex }) => {
+                return { 
+                    rowIndex,
+                    columnIndex: Math.max(0, columnIndex - 1)
+                };
+            });
+        } else if (e.key === "ArrowRight" || e.key === "Tab") {
+            setCursor(({ rowIndex, columnIndex }) => {
+                if (props.onAddColumn) {
+                    if (columnIndex + 1 >= props.columns.length) {
+                        props.onAddColumn();
+                    }
+                    return { 
+                        rowIndex,
+                        columnIndex: columnIndex + 1
+                    };
+                } else {
+                    // Block movement past edge of grid
+                    return { 
+                        rowIndex,
+                        columnIndex: Math.min(Math.max(0, props.columns.length - 1), columnIndex + 1)
+                    };
+                }
+            });
+        }
+    }, [props.rows.length, props.columns.length, props.onAddColumn, props.onAddRow]);
+
     return <table
         className={classNames('dngrid', (props.className ?? null))}
+        onKeyDown={onKeyDown}
     >
         {!props.disableColumnLabels && <thead>
             <tr>
