@@ -48,6 +48,16 @@ export type DungeonGridInternalCellData = {
      * The event handlers for the cell.
      */
     eventHandlers: EventHandlers,
+
+    /**
+     * True if the cursor is on the cell.
+     */
+    isCursor: boolean,
+
+    /**
+     * True if the cell is selected.
+     */
+    isSelected: boolean,
 } & (((({
     /**
      * True if the user is currently editing the cell.
@@ -147,43 +157,45 @@ export function DungeonGridRowComponent(props: DungeonGridInternalRowData): Reac
                     cell.className,
                     'dngrid-cell',
                     (idx < props.cellLeftPinCount ? 'dngrid-cell-pin-left' : null),
-                    (cell.isEditing ? 'dngrid-cell-editing' : null)
+                    (cell.isCursor ? 'dngrid-cell-cursor' : null),
+                    (cell.isSelected ? 'dngrid-cell-selected' : null),
+                    ('isEditing' in cell && cell.isEditing ? 'dngrid-cell-editing' : null)
                 )}
                 {...cell.eventHandlers}
             >
-                {'renderer' in cell ? cell.renderer : cell.label}
-                {cell.isEditing && (
-                    cell.editor === 'text' || cell.editor === undefined 
-                    ? <DungeonGridTextEditorComponent 
-                        value={cell.editorValue || ('label' in cell ? cell.label : '')}
-                        onCommit={(value) => {
-                            cell.onCommit?.(value);
-                            cell.setEditing(false);
-                        }}
-                    />
-                    : (cell.editor === 'longtext' 
-                    ? <DungeonGridTextareaEditorComponent
-                        value={cell.editorValue || ('label' in cell ? cell.label : '')}
-                        onCommit={(value) => {
-                            cell.onCommit?.(value);
-                            cell.setEditing(false);
-                        }}
-                    />
-                    : (cell.editor === 'checkbox'
-                    ? <DungeonGridCheckboxComponent
-                        value={cell.value}
-                        onCommit={(value) => {
-                            cell.onCommit?.(value);
-                            cell.setEditing(false);
-                        }}
-                    />
-                    : <cell.editor
-                        stopEditing={() => {
-                            cell.setEditing(false);
-                        }}
-                    />)
-                    )
-                )}
+                {cell.editor === 'checkbox' ? 
+                <DungeonGridCheckboxComponent
+                    value={cell.value}
+                    onCommit={(value) => {
+                        cell.onCommit?.(value);
+                    }}
+                /> : (<>
+                    {'renderer' in cell ? cell.renderer : cell.label}
+                    {cell.editor !== null && cell.isEditing && (
+                        cell.editor === 'text' || cell.editor === undefined 
+                        ? <DungeonGridTextEditorComponent 
+                            value={cell.editorValue || ('label' in cell ? cell.label : '')}
+                            onCommit={(value) => {
+                                cell.onCommit?.(value);
+                                cell.setEditing(false);
+                            }}
+                        />
+                        : (cell.editor === 'longtext' 
+                        ? <DungeonGridTextareaEditorComponent
+                            value={cell.editorValue || ('label' in cell ? cell.label : '')}
+                            onCommit={(value) => {
+                                cell.onCommit?.(value);
+                                cell.setEditing(false);
+                            }}
+                        />
+                        : <cell.editor
+                            stopEditing={() => {
+                                cell.setEditing(false);
+                            }}
+                        />
+                        )
+                    )}
+                </>)}
             </td>
         })}
     </tr>);

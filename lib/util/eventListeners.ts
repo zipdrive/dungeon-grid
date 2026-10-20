@@ -14,37 +14,26 @@ export type FocusEventHandlers = {
     onBlur?: (e: React.FocusEvent) => any,
 };
 
-export type ClipboardEventHandlers = {
-    onCopy?: (e: React.ClipboardEvent) => any,
-    onPaste?: (e: React.ClipboardEvent) => any,
-    onCut?: (e: React.ClipboardEvent) => any,
-};
-
 export type EventHandlers = 
     MouseEventHandlers 
     & FocusEventHandlers
-    & ClipboardEventHandlers
 ;
 
 /**
  * Extracts only the event handlers from an object.
  */
-export function extractEventHandlers(e: EventHandlers): EventHandlers {
+export function extractEventHandlers(e: EventHandlers, defaults: EventHandlers | null = null): EventHandlers {
     return {
-        onClick: e.onClick,
-        onDoubleClick: e.onDoubleClick,
-        onMouseDown: e.onMouseDown,
-        onMouseUp: e.onMouseUp,
-        onMouseMove: e.onMouseMove,
-        onMouseEnter: e.onMouseEnter,
-        onMouseLeave: e.onMouseLeave,
-        onContextMenu: e.onContextMenu,
+        onClick: e.onClick ?? defaults?.onClick,
+        onDoubleClick: e.onDoubleClick ?? defaults?.onDoubleClick,
+        onMouseDown: e.onMouseDown ?? defaults?.onMouseDown,
+        onMouseUp: e.onMouseUp ?? defaults?.onMouseUp,
+        onMouseMove: e.onMouseMove ?? defaults?.onMouseMove,
+        onMouseEnter: e.onMouseEnter ?? defaults?.onMouseEnter,
+        onMouseLeave: e.onMouseLeave ?? defaults?.onMouseLeave,
+        onContextMenu: e.onContextMenu ?? defaults?.onContextMenu,
 
-        onFocus: e.onFocus,
-        onBlur: e.onBlur,
-        
-        onCopy: e.onCopy,
-        onPaste: e.onPaste,
-        onCut: e.onCut
+        onFocus: e.onFocus ?? defaults?.onFocus,
+        onBlur: e.onBlur ?? defaults?.onBlur,
     };
 }
