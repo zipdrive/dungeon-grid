@@ -84,15 +84,15 @@ export type DungeonGridDateCell = DungeonGridCommonCellProperties & DungeonGridC
     editor: 'date',
     
     /**
-     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property coerced to a Date.
+     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property.
      */
-    editorValue?: Date,
+    editorValue?: string,
 
     /**
      * Callback function for when a change to the value of the cell is committed.
      * @param value The edited value of the cell.
      */
-    onCommit?: (value: Date) => any
+    onCommit?: (value: string) => any
 };
 
 /**
@@ -113,15 +113,15 @@ export type DungeonGridDatetimeCell = DungeonGridCommonCellProperties & DungeonG
     editor: 'datetime',
     
     /**
-     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property coerced to a Date.
+     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property.
      */
-    editorValue?: Date,
+    editorValue?: string,
 
     /**
      * Callback function for when a change to the value of the cell is committed.
      * @param value The edited value of the cell.
      */
-    onCommit?: (value: Date) => any
+    onCommit?: (value: string) => any
 };
 
 /**
@@ -142,9 +142,9 @@ export type DungeonGridNumberCell = DungeonGridCommonCellProperties & DungeonGri
     editor: 'number',
     
     /**
-     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property coerced to a floating-point number.
+     * The value to initially pass in to the editor. If not specified, defaults to the value of the "label" property.
      */
-    editorValue?: number,
+    editorValue?: string,
 
     /**
      * Callback function for when a change to the value of the cell is committed.
@@ -185,7 +185,40 @@ export type DungeonGridCheckboxCell = DungeonGridCommonCellProperties & {
 /**
  * A cell with a custom editor component.
  */
-export type DungeonGridCustomCell = DungeonGridCommonCellProperties & DungeonGridCellRenderer & {
+export type DungeonGridCustomCell = DungeonGridCommonCellProperties & DungeonGridCellRenderer & ({
+    /**
+     * The editor to use. This may be a custom React component, or it may be a string identifying one of the default editors. 
+     * The default editors are:
+     * - **text**: A text entry.
+     * - **date**: A date selector.
+     * - **datetime**: A date and time selector.
+     * - **number**: A number entry.
+     * - **checkbox**: A boolean value represented by a checkbox. (Specifying **checkbox** as the editor overwrites the label and renderer fields.)
+     * 
+     * To block users from being able to enter a value into this cell, set this field to null. Note that if the **onPaste** property is specified, the cell can still have a value pasted into it from the clipboard even if the editor is set to null.
+     */
+    editor: React.JSXElementConstructor<{
+        /**
+         * A text value that the editor is initialized with.
+         */
+        editorValue: string,
+
+        /**
+         * Function to close the editor component.
+         */
+        closeEditor: () => void
+    }>,
+
+    /**
+     * The value to initially pass to the editor. If not specified, defaults to the value of the "label" property.
+     */
+    editorValue?: string,
+
+    /**
+     * True if the user can type to start editing the cell. False if the user is forced to double-click or use the Escape key to start editing.
+     */
+    typeToStartEditing?: true 
+} | {
     /**
      * The editor to use. This may be a custom React component, or it may be a string identifying one of the default editors. 
      * The default editors are:
@@ -202,8 +235,13 @@ export type DungeonGridCustomCell = DungeonGridCommonCellProperties & DungeonGri
          * Function to close the editor component.
          */
         closeEditor: () => void
-    }>
-};
+    }>,
+
+    /**
+     * True if the user can type to start editing the cell. False if the user is forced to double-click or use the Escape key to start editing.
+     */
+    typeToStartEditing: false
+});
 
 /**
  * A cell that cannot be manually edited.
@@ -232,7 +270,6 @@ export type DungeonGridEditableCell =
     DungeonGridTextCell
     | DungeonGridDateCell
     | DungeonGridDatetimeCell
-    | DungeonGridNumberCell
     | DungeonGridCustomCell
 ;
 
@@ -243,7 +280,6 @@ export type DungeonGridCell =
     DungeonGridTextCell
     | DungeonGridDateCell
     | DungeonGridDatetimeCell
-    | DungeonGridNumberCell
     | DungeonGridCheckboxCell
     | DungeonGridCustomCell
     | DungeonGridReadonlyCell

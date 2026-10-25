@@ -4,7 +4,7 @@ import { DungeonGridCustomEditorProps } from './components/editors/customEditorP
 import classNames from 'classnames';
 import './DungeonGrid.css';
 import { DungeonGridCell, GetDungeonGridCellContentFunction, GetDungeonGridCellUpdateFunction } from './DungeonGridCell';
-import { DungeonGridMemoizedCellComponent } from './components/DungeonGridCellComponent';
+import { DungeonGridCellComponent } from './components/DungeonGridCellComponent';
 export { DungeonGridCell };
 
 
@@ -521,7 +521,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                     )}
                     {...(column.header === undefined || typeof column.header === 'string' ? {} : extractEventHandlers(column.header))}
                 >
-                    {typeof column.header === 'string' ? column.header : ((column.header && 'component' in column.header ? column.header.component : column.header?.text) ?? defaultColumnHeaders[columnIndex])}
+                    {typeof column.header === 'string' ? <span className="dngrid-header-label">{column.header}</span> : (column.header && 'component' in column.header ? column.header.component : <span className="dngrid-header-label">{column.header?.text ?? defaultColumnHeaders[columnIndex]}</span>)}
                 </div>
             })}
         </>)}
@@ -538,7 +538,8 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                     {typeof row.label === 'string' ? row.label : ((row.label && 'component' in row.label ? row.label.component : row.label?.text) ?? rowIndex.toString())}
                 </div>)}
                 {props.columns.map((column, columnIndex) => {
-                    return <DungeonGridMemoizedCellComponent
+                    const isSelected: boolean = testIfSelectedByIndex(rowIndex, columnIndex);
+                    return <DungeonGridCellComponent
                         key={`dngrid-cell-row${rowIndex}-column${columnIndex}`}
                         rowIndex={rowIndex}
                         columnIndex={columnIndex}
@@ -551,7 +552,8 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                         isCursor={cursor && cursor.rowIndex == rowIndex && cursor.columnIndex == columnIndex}
                         setCursor={setCursorByIndex}
                         isImmediatelyBelowCursor={cursor && cursor.rowIndex == rowIndex - 1 && cursor.columnIndex == columnIndex}
-                        isSelected={testIfSelectedByIndex(rowIndex, columnIndex)}
+                        isSelected={isSelected}
+                        isImmediatelyBelowSelected={!isSelected && rowIndex > 0 && testIfSelectedByIndex(rowIndex - 1, columnIndex)}
                     />;
                 })}
             </>;

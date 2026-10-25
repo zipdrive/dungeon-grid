@@ -1,55 +1,67 @@
 import React from "react";
 import { DungeonGridEditableCell, DungeonGridTextCell } from "../DungeonGridCell"
-import { DungeonGridTextareaEditorComponent } from "./editors/DungeonGridTextareaEditorComponent";
-import { DungeonGridNumberEditorComponent } from "./editors/DungeonGridNumberEditorComponent";
-import { DungeonGridDateEditorComponent } from "./editors/DungeonGridDateEditorComponent";
-import { DungeonGridDatetimeEditorComponent } from "./editors/DungeonGridDatetimeEditorComponent";
+import { DungeonGridMemoizedTextareaEditorComponent } from "./editors/DungeonGridTextareaEditorComponent";
+import { DungeonGridInputEditorComponent } from "./editors/DungeonGridInputEditorComponent";
 
 export type DungeonGridCellEditorComponentProps = {
     // The cell details.
     cell: DungeonGridEditableCell,
 
+    // The value that the editor is initialized with, if the user started typing into the cell.
+    editorInitialValue: string | null,
+
     // Function to close the editor.
     closeEditor: () => void,
 }
 
-function DungeonGridCellEditorComponent({ cell, closeEditor }: DungeonGridCellEditorComponentProps): React.JSX.Element {
+function DungeonGridCellEditorComponent({ cell, editorInitialValue, closeEditor }: DungeonGridCellEditorComponentProps): React.JSX.Element {
+    const editorValue: string = React.useMemo(() => {
+        return editorInitialValue ?? ('editorValue' in cell ? cell.editorValue : undefined) ?? ('label' in cell ? cell.label : undefined) ?? '';
+    }, [editorInitialValue, 'editorValue' in cell ? cell.editorValue : undefined, 'label' in cell ? cell.label : undefined]);
+    const selectAllText: boolean = React.useMemo(() => {
+        return editorInitialValue === null;
+    }, [editorInitialValue]);
+
     if (cell.editor === 'text' || cell.editor === undefined) {
-        return <DungeonGridTextareaEditorComponent
-            value={cell.editorValue ?? ('label' in cell && cell.label ? cell.label : '')}
-            onCommit={(value) => {
-                cell.onCommit?.(value);
-                closeEditor();
-            }}
-        />;
-    } else if (cell.editor === 'number') {
-        return <DungeonGridNumberEditorComponent
-            value={cell.editorValue || ('label' in cell && cell.label !== undefined && !Number.isNaN(parseFloat(cell.label)) ? parseFloat(cell.label) : 0)}
+        return <DungeonGridMemoizedTextareaEditorComponent
+            value={editorValue}
+            selectAllText={selectAllText}
             onCommit={(value) => {
                 cell.onCommit?.(value);
                 closeEditor();
             }}
         />;
     } else if (cell.editor === 'date') {
-        return <DungeonGridDateEditorComponent 
-            value={cell.editorValue || ('label' in cell && cell.label !== undefined && !Number.isNaN(Date.parse(cell.label)) ? new Date(Date.parse(cell.label)) : new Date())}
+        return <DungeonGridInputEditorComponent 
+            value={editorValue}
+            selectAllText={selectAllText}
+            inputType="date"
             onCommit={(value) => {
                 cell.onCommit?.(value);
                 closeEditor();
             }}
         />;
     } else if (cell.editor === 'datetime') {
-        return <DungeonGridDatetimeEditorComponent
-            value={cell.editorValue || ('label' in cell && cell.label !== undefined && !Number.isNaN(Date.parse(cell.label)) ? new Date(Date.parse(cell.label)) : new Date())}
+        return <DungeonGridInputEditorComponent
+            value={editorValue}
+            selectAllText={selectAllText}
+            inputType="datetime-local"
             onCommit={(value) => {
                 cell.onCommit?.(value);
                 closeEditor();
             }}
         />;
     } else {
-        return <cell.editor
-            closeEditor={closeEditor}
-        />;
+        if (cell.typeToStartEditing === false) {
+            return <cell.editor
+                closeEditor={closeEditor}
+            />;
+        } else {
+            return <cell.editor 
+                editorValue={editorValue}
+                closeEditor={closeEditor}
+            />;
+        }
     }
 }
 
