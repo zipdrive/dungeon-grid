@@ -24,12 +24,6 @@ export type DungeonGridCellComponentProps<RowKey, ColumnKey> = {
     // Function to check whether the content of the cell needs to be updated.
     getCellUpdate: GetDungeonGridCellUpdateFunction<RowKey, ColumnKey>,
 
-    // True if the cell is pinned to the left side of the grid.
-    pinLeft: boolean,
-
-    // True if the cell is pinned to the top side of the grid.
-    pinTop: boolean,
-
 
     // True if the cell is the current cursor.
     isCursor: boolean,
@@ -112,7 +106,6 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
         ref={divRef}
         className={classNames(
             'dngrid-cell',
-            (props.pinLeft ? 'dngrid-cell-pin-left' : null),
             (props.isCursor ? 'dngrid-cell-cursor' : null),
             (props.isImmediatelyBelowCursor ? 'dngrid-cell-immediately-below-cursor' : null), 
             (props.isSelected ? 'dngrid-cell-selected' : null),
@@ -133,7 +126,7 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
         /> 
         : 
         (<>
-            {'renderer' in cell ? cell.renderer : cell.label}
+            {cell.label}
             {editorInitialValue !== undefined 
             && cell.editor 
             && <DungeonGridMemoizedCellEditorComponent 

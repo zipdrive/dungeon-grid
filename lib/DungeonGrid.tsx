@@ -8,6 +8,23 @@ import { DungeonGridCellComponent } from './components/DungeonGridCellComponent'
 export { DungeonGridCell };
 
 
+export type DungeonGridColumnLabel = {
+    /**
+     * The class names for the column label. 
+     */
+    className?: string 
+} & EventHandlers & ({
+    /**
+     * The text of the column label.
+     */
+    text?: string 
+} | {
+    /**
+     * A custom component for the column label. 
+     */
+    component: React.ReactNode
+});
+
 /**
  * A column of the grid.
  */
@@ -18,24 +35,9 @@ export type DungeonGridColumn<ColumnKey> = {
     key: ColumnKey,
 
     /**
-     * Either the text of the column header (if a string), or else a configuration object for the column header. 
+     * Either the text of the column label (if a string), or else a configuration object for the column label. 
      */
-    header?: string | ({
-        /**
-         * The class names for the column header. 
-         */
-        className?: string 
-    } & EventHandlers & ({
-        /**
-         * The text of the column label.
-         */
-        text?: string 
-    } | {
-        /**
-         * A custom component for the column header. 
-         */
-        component: React.ReactNode
-    })),
+    label?: string | DungeonGridColumnLabel,
 
     /**
      * The width of the column.
@@ -48,15 +50,36 @@ export type DungeonGridColumn<ColumnKey> = {
 
     /**
      * True if the column can be resized.
+     * 
+     * **Currently non-functional.**
      */
     resizable?: boolean,
 
     /**
      * Callback function for after the column is resized.
+     * 
+     * **Currently non-functional.**
      * @param width The new width of the column.
      */
     onResizeColumn?: (width: number) => any,
 };
+
+export type DungeonGridRowLabel = {
+    /**
+     * The class names for the row label.
+     */
+    className?: string
+} & EventHandlers & ({
+    /**
+     * The text of the row label.
+     */
+    text?: string 
+} | {
+    /**
+     * A custom component for the row label.
+     */
+    component: React.ReactNode 
+});
 
 /**
  * A row of the grid.
@@ -70,22 +93,7 @@ export type DungeonGridRow<RowKey> = {
     /**
      * Either the text of the row label (if a string), or else a configuration object for the row label.
      */
-    label?: string | ({
-        /**
-         * The class names for the row label.
-         */
-        className?: string
-    } & EventHandlers & ({
-        /**
-         * The text of the row label.
-         */
-        text?: string 
-    } | {
-        /**
-         * A custom component for the row label.
-         */
-        component: React.ReactNode 
-    })),
+    label?: string | DungeonGridRowLabel,
 
     /**
      * The height of the row.
@@ -98,11 +106,15 @@ export type DungeonGridRow<RowKey> = {
 
     /**
      * True if the row can be resized.
+     * 
+     * **Currently non-functional.**
      */
     resizable?: boolean,
 
     /**
      * Callback function for after the user finishes resizing the row.
+     * 
+     * **Currently non-functional.**
      * @param height The new height of the row.
      */
     onRowResize?: (height: number) => any 
@@ -155,16 +167,6 @@ export type DungeonGridProps<RowKey, ColumnKey> = {
      * True if row labels should be disabled.
      */
     disableRowLabels?: boolean,
-
-    /**
-     * The number of columns to pin to the left of the grid.
-     */
-    pinColumnsLeft?: number,
-
-    /**
-     * The number of rows to pin to the top of the grid.
-     */
-    pinRowsTop?: number,
 };
 
 export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, ColumnKey>): React.JSX.Element {
@@ -517,11 +519,11 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                     key={`dngrid-header-column${columnIndex}`}
                     className={classNames(
                         'dngrid-header',
-                        (column.header === undefined || typeof column.header === 'string' ? null : (column.header.className ?? null))
+                        (column.label === undefined || typeof column.label === 'string' ? null : (column.label.className ?? null))
                     )}
-                    {...(column.header === undefined || typeof column.header === 'string' ? {} : extractEventHandlers(column.header))}
+                    {...(column.label === undefined || typeof column.label === 'string' ? {} : extractEventHandlers(column.label))}
                 >
-                    {typeof column.header === 'string' ? <span className="dngrid-header-label">{column.header}</span> : (column.header && 'component' in column.header ? column.header.component : <span className="dngrid-header-label">{column.header?.text ?? defaultColumnHeaders[columnIndex]}</span>)}
+                    {typeof column.label === 'string' ? <span className="dngrid-header-label">{column.label}</span> : (column.label && 'component' in column.label ? column.label.component : <span className="dngrid-header-label">{column.label?.text ?? defaultColumnHeaders[columnIndex]}</span>)}
                 </div>
             })}
         </>)}
@@ -547,8 +549,6 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                         columnKey={column.key}
                         getCellContent={props.getCellContent}
                         getCellUpdate={props.getCellUpdate}
-                        pinLeft={props.pinColumnsLeft !== undefined && columnIndex < props.pinColumnsLeft}
-                        pinTop={props.pinRowsTop !== undefined && rowIndex < props.pinRowsTop}
                         isCursor={cursor && cursor.rowIndex == rowIndex && cursor.columnIndex == columnIndex}
                         setCursor={setCursorByIndex}
                         isImmediatelyBelowCursor={cursor && cursor.rowIndex == rowIndex - 1 && cursor.columnIndex == columnIndex}

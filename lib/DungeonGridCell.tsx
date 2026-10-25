@@ -32,9 +32,7 @@ export type DungeonGridCommonCellProperties = EventHandlers & {
 };
 
 export type DungeonGridCellRenderer = {
-    renderer: React.ReactNode 
-} | {
-    label?: string
+    label?: string | React.ReactNode
 };
 
 /**

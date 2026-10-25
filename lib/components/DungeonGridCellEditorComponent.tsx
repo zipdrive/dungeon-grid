@@ -16,7 +16,7 @@ export type DungeonGridCellEditorComponentProps = {
 
 function DungeonGridCellEditorComponent({ cell, editorInitialValue, closeEditor }: DungeonGridCellEditorComponentProps): React.JSX.Element {
     const editorValue: string = React.useMemo(() => {
-        return editorInitialValue ?? ('editorValue' in cell ? cell.editorValue : undefined) ?? ('label' in cell ? cell.label : undefined) ?? '';
+        return editorInitialValue ?? ('editorValue' in cell ? cell.editorValue : undefined) ?? ('label' in cell && typeof cell.label === 'string' ? cell.label : undefined) ?? '';
     }, [editorInitialValue, 'editorValue' in cell ? cell.editorValue : undefined, 'label' in cell ? cell.label : undefined]);
     const selectAllText: boolean = React.useMemo(() => {
         return editorInitialValue === null;
