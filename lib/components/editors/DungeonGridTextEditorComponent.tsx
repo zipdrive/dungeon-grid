@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 
 export type DungeonGridTextEditorProps = {
@@ -9,6 +10,8 @@ export function DungeonGridTextEditorComponent(props: DungeonGridTextEditorProps
     const [value, setValue] = React.useState<string>(props.value);
     
     return <input
+        autoFocus
+        className={classNames("dngrid-editor-text")}
         value={value}
         onChange={(e) => { setValue(e.target.value); }}
         onKeyDown={(e) => {

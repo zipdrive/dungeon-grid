@@ -1,15 +1,97 @@
 .dngrid {
+    --dngrid-border-color: gray;
+    --dngrid-cell-border-color: var(--dngrid-border-color);
+    --dngrid-header-border-color: var(--dngrid-border-color);
+    --dngrid-row-label-border-color: var(--dngrid-border-color);
+    --dngrid-cell-cursor-border-color: blue;
+    --dngrid-background-color: lightgray;
+    --dngrid-cell-background-color: var(--dngrid-background-color);
+    --dngrid-header-background-color: var(--dngrid-background-color);
+    --dngrid-row-label-background-color: var(--dngrid-background-color);
+    --dngrid-cell-cursor-background-color: var(--dngrid-background-color);
+    --dngrid-cell-selected-background-color: lightblue;
+    --dngrid-editor-background-color: white;
 
+    --dngrid-padding: 4px;
+    --dngrid-vertical-padding: var(--dngrid-padding, 4px);
+    --dngrid-horizontal-padding: var(--dngrid-padding, 4px);
+
+    border: none;
+    outline: none;
+    display: grid;
+}
+
+.dngrid-top-left-corner, .dngrid-header, .dngrid-row-label, .dngrid-cell {
+    box-sizing: border-box;
+    padding: var(--dngrid-vertical-padding) var(--dngrid-horizontal-padding);
 }
 
 .dngrid-header {
-
+    position: relative;
+    min-height: calc(1lh + (2 * var(--dngrid-vertical-padding)));
+    border: none;
+    background-color: var(--dngrid-header-background-color);
+    border: 1px solid var(--dngrid-header-border-color);
+    margin-bottom: -1px;
+    margin-right: -1px;
+}
+.dngrid-header-label {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    user-select: none;
+    cursor: default;
+    font-weight: bold;
 }
 
 .dngrid-row-label {
-
+    position: relative;
+    border: none;
+    background-color: var(--dngrid-row-label-background-color);
+    border: 1px solid var(--dngrid-row-label-border-color);
+    margin-bottom: -1px;
+    margin-right: -1px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+    user-select: none;
+    cursor: default;
+    font-weight: bold;
 }
 
 .dngrid-cell {
+    position: relative;
+    border: 1px solid var(--dngrid-cell-border-color);
+    margin-bottom: -1px;
+    margin-right: -1px;
+    background-color: var(--dngrid-cell-background-color);
+    user-select: none;
+    cursor: default;
+}
 
+.dngrid:focus .dngrid-cell-cursor {
+    border-color: var(--dngrid-cell-cursor-border-color);
+    background-color: var(--dngrid-cell-cursor-background-color);
+    
+    & + .dngrid-cell {
+        border-left-color: var(--dngrid-cell-cursor-border-color);
+    }
+}
+.dngrid:focus .dngrid-cell-immediately-below-cursor {
+    border-top-color: var(--dngrid-cell-cursor-border-color);
+}
+
+.dngrid:focus .dngrid-cell-selected:not(.dngrid-cell-cursor) {
+    background-color: var(--dngrid-cell-selected-background-color);
+}
+
+.dngrid-editor-text, .dngrid-editor-longtext {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--dngrid-vertical-padding) var(--dngrid-horizontal-padding);
+    background-color: var(--dngrid-editor-background-color);
 }

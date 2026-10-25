@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 
 export type DungeonGridCheckboxProps = {
@@ -9,6 +10,7 @@ export function DungeonGridCheckboxComponent(props: DungeonGridCheckboxProps): R
     const [value, setValue] = React.useState<boolean>(props.value);
     
     return <input
+        className={classNames("dngrid-checkbox")}
         type="checkbox"
         checked={value}
         onChange={(e) => { setValue(e.target.checked); }}
