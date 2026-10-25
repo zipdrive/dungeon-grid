@@ -1,12 +1,18 @@
 # DungeonGrid
 
-**DungeonGrid** is a spreadsheet-like React component. The source code is under the MIT license and can be found [here](https://github.com/zipdrive/dungeon-grid).
+**DungeonGrid** is a spreadsheet-like React component designed to put most of the logic into the developer's hands. The source code is under the MIT license and can be found [here](https://github.com/zipdrive/dungeon-grid).
+
+Install into your project with:
+
+```
+npm install @dungeon-grid/react
+```
 
 Basic usage is as follows:
 
 ```JSX
 import React from 'react';
-import { DungeonGrid, DungeonGridRow, DungeonGridColumn } from '@dungeon-grid/react';
+import { DungeonGrid, DungeonGridRow, DungeonGridColumn, DungeonGridCell } from '@dungeon-grid/react';
 
 type RowKey = number;
 type Row = {
@@ -20,49 +26,49 @@ type ColumnKey = keyof Row;
 function DungeonGridDemo(props: {
   data: Row[]
 }): React.JSX.Element {
+  // Cache for the data
+  const [dataCache, setDataCache] = React.useState<Row[]>([]);
+
   // The rows of the grid
   const rows: DungeonGridRow<RowKey>[] = React.useMemo(() => {
-    return [...Array(props.data.length).keys()
+    return [...Array(dataCache.length).keys()
       .map((rowIndex) => {
         return {
           key: rowIndex
         };
       })
     ];
-  }, [props.data.length]);
+  }, [dataCache.length]);
 
   // The columns of the grid
   const columns: DungeonGridColumn<ColumnKey>[] = React.useMemo(() => {
     return [
       {
         key: 'name',
-        header: "Name"
+        label: "Name"
       },
       {
         key: 'phoneNumber',
-        header: {
-          component: <span>&#9743; Phone Number</span>
+        label: {
+          component: <span>&#9743; Phone Number</span>,
+          onClick: () => {
+            console.log('You clicked the Phone Number column label!');
+          }
         }
       },
       {
         key: 'email',
-        header: {
+        label: {
           className: "emailHeader",
-          onClick: () => {
-            console.log('You clicked the email header!');
-          },
           text: "Email"
         }
       },
       {
         key: 'birthday'
-        // Since the header for this column is not specified, it will use the default header for column #4, which is "D"
+        // Since the label for this column is not specified, it will use the default label for column #4, which is "D"
       }
     ];
   }, []);
-
-  // Cache for the data
-  const [dataCache, setDataCache] = React.useState<Row[]>([]);
 
   // Function to get a cell's contents, given the row key and column key
   const getCellContent = React.useCallback((rowKey: RowKey, columnKey: ColumnKey) => {
@@ -75,12 +81,15 @@ function DungeonGridDemo(props: {
         };
       case 'phoneNumber': 
         return {
-          label: dataCache[rowKey].phoneNumber
+          label: dataCache[rowKey].phoneNumber,
+          onClick: () => {
+            console.log('You clicked a Phone Number cell!');
+          }
         };
       case 'email': {
         const email: string = dataCache[rowKey].email;
         return {
-          renderer: <a href={`mailto:${email}`}>{email}</a>, // Uses a custom component for rendering the cell value
+          label: <a href={`mailto:${email}`}>{email}</a>, // Uses a custom component for rendering the cell value
           editorValue: email
         };
       }
