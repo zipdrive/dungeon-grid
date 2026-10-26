@@ -5,14 +5,14 @@
 Install into your project with:
 
 ```
-npm install @dungeon-grid/react
+npm install dungeon-grid-react
 ```
 
 Basic usage is as follows:
 
 ```JSX
 import React from 'react';
-import { DungeonGrid, DungeonGridRow, DungeonGridColumn, DungeonGridCell } from '@dungeon-grid/react';
+import { DungeonGrid, DungeonGridRow, DungeonGridColumn, DungeonGridCell } from 'dungeon-grid-react';
 
 type RowKey = number;
 type Row = {
