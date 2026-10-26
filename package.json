@@ -1,9 +1,9 @@
 {
-  "name": "@dungeon-grid/react",
+  "name": "dungeon-grid-react",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
-  "main": "./dist/react.js",
+  "main": "./dist/dungeon-grid-react.js",
   "types": "./dist/main.d.ts",
   "files": [
     "./dist/**"

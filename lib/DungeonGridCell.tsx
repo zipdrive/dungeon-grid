@@ -5,6 +5,11 @@ export type DungeonGridCommonCellProperties = EventHandlers & {
      * The class names for the cell.
      */
     className?: string,
+    
+    /**
+     * The inline CSS style properties for the cell.
+     */
+    style?: React.CSSProperties,
 
     /**
      * True if the cell can be selected with the cursor. False if the cell cannot be selected with the cursor.

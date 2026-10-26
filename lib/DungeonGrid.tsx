@@ -12,7 +12,12 @@ export type DungeonGridColumnLabel = {
     /**
      * The class names for the column label. 
      */
-    className?: string 
+    className?: string,
+
+    /**
+     * The inline CSS style properties for the column label.
+     */
+    style?: React.CSSProperties
 } & EventHandlers & ({
     /**
      * The text of the column label.
@@ -68,7 +73,12 @@ export type DungeonGridRowLabel = {
     /**
      * The class names for the row label.
      */
-    className?: string
+    className?: string,
+
+    /**
+     * The inline CSS style properties for the row label.
+     */
+    style?: React.CSSProperties
 } & EventHandlers & ({
     /**
      * The text of the row label.
@@ -521,6 +531,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                         'dngrid-header',
                         (column.label === undefined || typeof column.label === 'string' ? null : (column.label.className ?? null))
                     )}
+                    style={column.label === undefined || typeof column.label === 'string' ? undefined : column.label.style}
                     {...(column.label === undefined || typeof column.label === 'string' ? {} : extractEventHandlers(column.label))}
                 >
                     {typeof column.label === 'string' ? <span className="dngrid-header-label">{column.label}</span> : (column.label && 'component' in column.label ? column.label.component : <span className="dngrid-header-label">{column.label?.text ?? defaultColumnHeaders[columnIndex]}</span>)}
@@ -535,6 +546,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                         'dngrid-row-label',
                         (row.label === undefined || typeof row.label === 'string' ? null : (row.label.className ?? null))
                     )}
+                    style={row.label === undefined || typeof row.label === 'string' ? undefined : row.label.style}
                     {...(row.label === undefined || typeof row.label === 'string' ? {} : extractEventHandlers(row.label))}
                 >
                     {typeof row.label === 'string' ? row.label : ((row.label && 'component' in row.label ? row.label.component : row.label?.text) ?? rowIndex.toString())}

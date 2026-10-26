@@ -58,6 +58,9 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
             setCell(props.getCellContent(props.rowKey, props.columnKey));
         }
     }, [props.rowKey, props.columnKey, props.getCellContent, props.getCellUpdate]);
+    React.useEffect(() => {
+        setCell(props.getCellContent(props.rowKey, props.columnKey));
+    }, [props.rowKey, props.columnKey]);
     
     const [editorInitialValue, setEditorInitialValue] = React.useState<string | null | undefined>(undefined);
     const closeEditor = React.useCallback(() => { 
@@ -112,6 +115,7 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
             (props.isImmediatelyBelowSelected ? 'dngrid-cell-immediately-below-selected' : null),
             cell.className
         )}
+        style={cell.style}
         tabIndex={0}
         {...eventHandlers}
         onKeyDown={onKeyDown}
@@ -129,11 +133,21 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
             {cell.label}
             {editorInitialValue !== undefined 
             && cell.editor 
-            && <DungeonGridMemoizedCellEditorComponent 
-                cell={cell} 
-                editorInitialValue={editorInitialValue} 
-                closeEditor={closeEditor} 
-            />}
+            && <div 
+                style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0
+                }}
+            >
+                <DungeonGridMemoizedCellEditorComponent 
+                    cell={cell} 
+                    editorInitialValue={editorInitialValue} 
+                    closeEditor={closeEditor} 
+                />
+            </div>}
         </>)}
     </div>;
 }
