@@ -12,6 +12,12 @@ export type DungeonGridCellComponentProps<RowKey, ColumnKey> = {
     // The index of the column.
     columnIndex: number,
 
+    // The row in the grid container.
+    gridRow: number,
+
+    // The column in the grid container.
+    gridColumn: number,
+
     // The unique key of the row.
     rowKey: RowKey,
 
@@ -115,7 +121,11 @@ export function DungeonGridCellComponent<RowKey, ColumnKey>(props: DungeonGridCe
             (props.isImmediatelyBelowSelected ? 'dngrid-cell-immediately-below-selected' : null),
             cell.className
         )}
-        style={cell.style}
+        style={{
+            gridRow: props.gridRow,
+            gridColumn: props.gridColumn,
+            ...cell.style,
+        }}
         tabIndex={0}
         {...eventHandlers}
         onKeyDown={onKeyDown}
