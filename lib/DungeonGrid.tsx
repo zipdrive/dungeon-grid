@@ -5,6 +5,10 @@ import classNames from 'classnames';
 import './DungeonGrid.css';
 import { DungeonGridCell, GetDungeonGridCellContentFunction, GetDungeonGridCellUpdateFunction } from './DungeonGridCell';
 import { DungeonGridCellComponent } from './components/DungeonGridCellComponent';
+import { DungeonGridRowLabelComponent } from './components/DungeonGridRowLabelComponent';
+import { DungeonGridRowResizerComponent } from './components/DungeonGridRowResizerComponent';
+import { DungeonGridColumnLabelComponent } from './components/DungeonGridColumnLabelComponent';
+import { DungeonGridColumnResizerComponent } from './components/DungeonGridColumnResizerComponent';
 export { DungeonGridCell };
 
 
@@ -12,7 +16,12 @@ export type DungeonGridColumnLabel = {
     /**
      * The class names for the column label. 
      */
-    className?: string 
+    className?: string,
+
+    /**
+     * The inline CSS style properties for the column label.
+     */
+    style?: React.CSSProperties
 } & EventHandlers & ({
     /**
      * The text of the column label.
@@ -50,15 +59,11 @@ export type DungeonGridColumn<ColumnKey> = {
 
     /**
      * True if the column can be resized.
-     * 
-     * **Currently non-functional.**
      */
     resizable?: boolean,
 
     /**
      * Callback function for after the column is resized.
-     * 
-     * **Currently non-functional.**
      * @param width The new width of the column.
      */
     onResizeColumn?: (width: number) => any,
@@ -68,7 +73,12 @@ export type DungeonGridRowLabel = {
     /**
      * The class names for the row label.
      */
-    className?: string
+    className?: string,
+
+    /**
+     * The inline CSS style properties for the row label.
+     */
+    style?: React.CSSProperties
 } & EventHandlers & ({
     /**
      * The text of the row label.
@@ -106,15 +116,11 @@ export type DungeonGridRow<RowKey> = {
 
     /**
      * True if the row can be resized.
-     * 
-     * **Currently non-functional.**
      */
     resizable?: boolean,
 
     /**
      * Callback function for after the user finishes resizing the row.
-     * 
-     * **Currently non-functional.**
      * @param height The new height of the row.
      */
     onRowResize?: (height: number) => any 
@@ -177,14 +183,56 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
         return props.getCellContent(props.rows[rowIndex].key, props.columns[columnIndex].key);
     }, [props.rows, props.columns, props.getCellContent]);
 
-    const [rowHeights, setRowHeights] = React.useState<(number | string)[]>(props.rows.map(({ height }) => height !== undefined ? height : 'min-content'));
+    const [templateRowHeights, setTemplateRowHeights] = React.useState<(number | string)[]>(props.rows.map(({ height }) => height !== undefined ? height : 'min-content'));
+    const setTemplateRowHeight = React.useCallback((rowIndex: number, rowHeight: number) => {
+        setTemplateRowHeights((oldTemplateRowHeights) => {
+            const newTemplateRowHeights = [...oldTemplateRowHeights];
+            newTemplateRowHeights[rowIndex] = rowHeight;
+            return newTemplateRowHeights;
+        });
+    }, []);
+    const [actualRowHeights, setActualRowHeights] = React.useState<number[]>(props.rows.map(() => 0));
+    const setActualRowHeight = React.useCallback((rowIndex: number, rowHeight: number) => {
+        setActualRowHeights((oldActualRowHeights) => {
+            const newActualRowHeights = [...oldActualRowHeights];
+            newActualRowHeights[rowIndex] = rowHeight;
+            return newActualRowHeights;
+        });
+    }, []);
     React.useEffect(() => {
-        setRowHeights(props.rows.map(({ height }) => height !== undefined ? height : 'min-content'));
-    }, [props.rows.length]);
-    const [columnWidths, setColumnWidths] = React.useState<(number | string)[]>(props.columns.map(({ width }) => width !== undefined ? width : 'min-content'));
+        setTemplateRowHeights(props.rows.map(({ height }) => height !== undefined ? height : 'min-content'));
+        setActualRowHeights((oldActualRowHeights) => {
+            return props.rows.map(({ height }, rowIndex) => typeof height === 'number' ? height : oldActualRowHeights[rowIndex]);
+        });
+    }, [props.rows]);    
+
+    const [templateColumnWidths, setTemplateColumnWidths] = React.useState<(number | string)[]>(props.columns.map(({ width }) => width !== undefined ? width : 'min-content'));
+    const setTemplateColumnWidth = React.useCallback((columnIndex: number, columnWidth: number) => {
+        setTemplateColumnWidths((oldTemplateColumnWidths) => {
+            const newTemplateColumnWidths = [...oldTemplateColumnWidths];
+            newTemplateColumnWidths[columnIndex] = columnWidth;
+            return newTemplateColumnWidths;
+        });
+    }, []);
+    const [actualColumnWidths, setActualColumnWidths] = React.useState<number[]>(props.columns.map(() => 0));
+    const setActualColumnWidth = React.useCallback((columnIndex: number, columnWidth: number) => {
+        setActualColumnWidths((oldActualColumnWidths) => {
+            const newActualColumnWidths = [...oldActualColumnWidths];
+            newActualColumnWidths[columnIndex] = columnWidth;
+            return newActualColumnWidths;
+        });
+    }, []);
     React.useEffect(() => {
-        setColumnWidths(props.columns.map(({ width }) => width !== undefined ? width : 'min-content'));
-    }, [props.columns.length]);
+        setTemplateColumnWidths(props.columns.map(({ width }) => width !== undefined ? width : 'min-content'));
+        setActualColumnWidths((oldActualColumnWidths) => {
+            return props.columns.map(({ width }, columnIndex) => typeof width === 'number' ? width : oldActualColumnWidths[columnIndex]);
+        });
+    }, [props.columns]);
+
+    React.useEffect(() => {
+        console.log(JSON.stringify(actualColumnWidths));
+    }, [actualColumnWidths]);
+    
     const [rowLabelWidth, setRowLabelWidth] = React.useState<number | null>(null);
     const [columnHeaderHeight, setColumnHeaderHeight] = React.useState<number | null>(null);
 
@@ -397,6 +445,10 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
      * Copy the data from the selected cells onto the clipboard.
      */
     const onCopy = React.useCallback((e: React.ClipboardEvent) => {
+        console.log('onCopy triggered.');
+        e.preventDefault();
+        e.stopPropagation();
+
         // Copy data from selected cells onto clipboard
         const data: string = selectedCells.map((row) => row.map<string>((r) => {
             if (r) {
@@ -430,6 +482,9 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
      * Paste the data from the clipboard at the cursor location.
      */
     const onPaste = React.useCallback(async (e: React.ClipboardEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         if (e.clipboardData.types.indexOf('text/plain') >= 0) {
             const rawData: string = e.clipboardData.getData('text/plain');
             const data: string[][] = rawData.split('\n').map((row) => row.split('\t'));
@@ -458,47 +513,25 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
     }, [cursor, props.columns.length, props.rows.length, getCellByIndex]);
 
 
-
-    // The default header for each column, in case not specified.
-    const defaultColumnHeaders: string[] = React.useMemo(() => {
-        return [...Array(props.columns.length).keys().map<string>((columnIndex) => {
-            let defaultLabel: string = '';
-            let n = columnIndex + 1;
-            while (n > 0.5) {
-                const x: number = (n - 1) % 26;
-                defaultLabel = String.fromCharCode(x + 60) + defaultLabel;
-                n = Math.floor((n - 1) / 26);
-            }
-            return defaultLabel;
-        })];
-    }, [props.columns.length]);
-
     /**
      * The grid style
      */
     const dngridStyle: React.CSSProperties = React.useMemo(() => {
         return Object.assign({
-            gridTemplateColumns: (props.disableRowLabels ? [] : [rowLabelWidth !== null ? `${rowLabelWidth}px` : 'min-content'])
-                .concat(columnWidths.map((width) => {
-                    if (typeof width === 'number') {
-                        return `${width}px`;
-                    } else {
-                        return width;
-                    }
+            gridTemplateColumns: (props.disableRowLabels ? [] : [rowLabelWidth !== null ? `${rowLabelWidth}px 0` : 'min-content 0'])
+                .concat(templateColumnWidths.flatMap((width) => {
+                    const trackSize1 = typeof width === 'number' ? `${width}px` : width;
+                    return [trackSize1, '0'];
                 }))
                 .join(' '),
-            gridTemplateRows: (props.disableColumnLabels ? [] : [columnHeaderHeight !== null ? `${columnHeaderHeight}px` : 'min-content'])
-                .concat(rowHeights.map((height) => {
-                    if (typeof height === 'number') {
-                        return `${height}px`;
-                    } else {
-                        return height;
-                    }
+            gridTemplateRows: (props.disableColumnLabels ? [] : [columnHeaderHeight !== null ? `${columnHeaderHeight}px 0` : 'min-content 0'])
+                .concat(templateRowHeights.flatMap((height) => {
+                    const trackSize1: string = typeof height === 'number' ? `${height}px` : height;
+                    return [trackSize1, '0'];
                 }))
                 .join(' ')
         }, props.style);
-    }, [props.disableRowLabels, props.disableColumnLabels, columnWidths, rowHeights, columnHeaderHeight, rowLabelWidth]);
-
+    }, [props.disableRowLabels, props.disableColumnLabels, templateColumnWidths, templateRowHeights, columnHeaderHeight, rowLabelWidth]);
     
     return <div 
         style={dngridStyle}
@@ -512,39 +545,41 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
         onCut={onCut}
         onPaste={onPaste}
     >
-        {!props.disableColumnLabels && (<>
-            <div className="dngrid-top-left-corner" />
-            {props.columns.map((column, columnIndex) => {
-                return <div 
-                    key={`dngrid-header-column${columnIndex}`}
-                    className={classNames(
-                        'dngrid-header',
-                        (column.label === undefined || typeof column.label === 'string' ? null : (column.label.className ?? null))
-                    )}
-                    {...(column.label === undefined || typeof column.label === 'string' ? {} : extractEventHandlers(column.label))}
-                >
-                    {typeof column.label === 'string' ? <span className="dngrid-header-label">{column.label}</span> : (column.label && 'component' in column.label ? column.label.component : <span className="dngrid-header-label">{column.label?.text ?? defaultColumnHeaders[columnIndex]}</span>)}
-                </div>
-            })}
-        </>)}
+        <div
+            className={classNames(
+                "dngrid-top-left-corner",
+                (props.disableRowLabels || props.disableColumnLabels ? "dngrid-hidden" : null)
+            )}
+        />
+        {props.columns.map((column, columnIndex) => (<DungeonGridColumnLabelComponent
+            key={`dngrid-label-column${columnIndex}`}
+            visible={!props.disableColumnLabels}
+            column={column}
+            columnIndex={columnIndex}
+            gridColumn={1 + (2 * (columnIndex + (props.disableRowLabels ? 0 : 1)))}
+            isImmediatelyAboveCursor={cursor !== null && cursor.rowIndex == 0 && cursor.columnIndex == columnIndex}
+            isImmediatelyAboveSelected={testIfSelectedByIndex(0, columnIndex)}
+            setActualWidth={setActualColumnWidth}
+        />))}
         {props.rows.map((row, rowIndex) => {
+            const gridRow: number = 1 + (2 * (rowIndex + (props.disableColumnLabels ? 0 : 1)));
             return <>
-                {!props.disableRowLabels && (<div
+                {!props.disableRowLabels && <DungeonGridRowLabelComponent 
                     key={`dngrid-label-row${rowIndex}`}
-                    className={classNames(
-                        'dngrid-row-label',
-                        (row.label === undefined || typeof row.label === 'string' ? null : (row.label.className ?? null))
-                    )}
-                    {...(row.label === undefined || typeof row.label === 'string' ? {} : extractEventHandlers(row.label))}
-                >
-                    {typeof row.label === 'string' ? row.label : ((row.label && 'component' in row.label ? row.label.component : row.label?.text) ?? rowIndex.toString())}
-                </div>)}
+                    visible={!props.disableRowLabels}
+                    row={row}
+                    rowIndex={rowIndex}
+                    gridRow={gridRow}
+                    setActualHeight={setActualRowHeight}
+                />}
                 {props.columns.map((column, columnIndex) => {
                     const isSelected: boolean = testIfSelectedByIndex(rowIndex, columnIndex);
                     return <DungeonGridCellComponent
                         key={`dngrid-cell-row${rowIndex}-column${columnIndex}`}
                         rowIndex={rowIndex}
                         columnIndex={columnIndex}
+                        gridRow={gridRow}
+                        gridColumn={1 + (2 * (columnIndex + (props.disableRowLabels ? 0 : 1)))}
                         rowKey={row.key}
                         columnKey={column.key}
                         getCellContent={props.getCellContent}
@@ -558,5 +593,22 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
                 })}
             </>;
         })}
+        {props.columns.filter(({ resizable }) => resizable).map((column, columnIndex) => <DungeonGridColumnResizerComponent
+            key={`dngrid-resizer-column${columnIndex}`}
+            gridColumn={2 * (columnIndex + (props.disableRowLabels ? 1 : 2))}
+            gridRowSpan={1}
+            columnIndex={columnIndex}
+            actualColumnWidths={actualColumnWidths}
+            setTemplateColumnWidth={setTemplateColumnWidth}
+            onResizeColumn={column.onResizeColumn}
+        />)}
+        {props.rows.filter(({ resizable }) => resizable).map((row, rowIndex) => <DungeonGridRowResizerComponent
+            gridRow={2 * (rowIndex + (props.disableColumnLabels ? 1 : 2))}
+            gridColumnSpan={1}
+            rowIndex={rowIndex}
+            actualRowHeights={actualRowHeights}
+            setTemplateRowHeight={setTemplateRowHeight}
+            onResizeRow={row.onRowResize}
+        />)}
     </div>;
 }
