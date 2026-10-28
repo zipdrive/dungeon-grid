@@ -102,6 +102,24 @@
     }
     .dngrid-cell-immediately-below-cursor {
         border-top-color: var(--dngrid-cell-cursor-border-color);
+        & + .dngrid-cell {
+            border-top-left-radius: 1px;
+        }
+    }
+    .dngrid-row-label:has(+ .dngrid-cell-cursor) {
+        border-right-color: var(--dngrid-cell-cursor-border-color);
+    }
+    .dngrid-row-label:has(+ .dngrid-cell-immediately-below-cursor) {
+        border-top-right-radius: 1px;
+    }
+    .dngrid-top-left-corner:has(+ .dngrid-column-label-immediately-above-cursor) {
+        border-bottom-right-radius: 1px;
+    }
+    .dngrid-column-label-immediately-above-cursor {
+        border-bottom-color: var(--dngrid-cell-cursor-border-color);
+        & + .dngrid-column-label {
+            border-bottom-left-radius: 1px;
+        }
     }
 
     .dngrid-cell-selected:not(.dngrid-cell-cursor) {
@@ -114,6 +132,18 @@
     }
     .dngrid-cell-immediately-below-selected:not(.dngrid-cell-immediately-below-cursor) {
         border-top-color: var(--dngrid-cell-selected-border-color);
+    }
+    .dngrid-row-label:has(+ .dngrid-cell-selected:not(.dngrid-cell-cursor)) {
+        border-right-color: var(--dngrid-cell-selected-border-color);
+    }
+    .dngrid-top-left-corner:has(+ .dngrid-column-label-immediately-above-selected) {
+        border-bottom-right-radius: 1px;
+    }
+    .dngrid-column-label-immediately-above-selected:not(.dngrid-column-label-immediately-above-cursor) {
+        border-bottom-color: var(--dngrid-cell-selected-border-color);
+        & + .dngrid-column-label {
+            border-bottom-left-radius: 1px;
+        }
     }
 }
 
@@ -133,16 +163,23 @@
 
 .dngrid-row-resizer {
     z-index: 3;
-    margin-bottom: -3px;
+    position: relative;
+    margin-bottom: -5px;
     margin-left: -1px;
     margin-right: -1px;
-    margin-top: -3px;
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-    background-color: transparent;
+    margin-top: -4px;
     cursor: ns-resize;
 
-    &:hover {
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 2px;
+        bottom: 2px;
+        background-color: transparent;
+    }
+    &:hover::after {
         background-color: var(--dngrid-cell-cursor-border-color);
         transition: background-color 0.5s;
     }
@@ -150,17 +187,29 @@
 
 .dngrid-column-resizer {
     z-index: 3;
-    margin-left: -3px;
+    position: relative;
+    margin-left: -4px;
     margin-top: -1px;
     margin-bottom: -1px;
-    margin-right: -3px;
-    border-left: 1px solid transparent;
-    border-right: 1px solid transparent;
-    background-color: transparent;
+    margin-right: -5px;
     cursor: ew-resize;
 
-    &:hover {
+    &::after {
+        content: "";
+        position: absolute;
+        left: 2px;
+        right: 2px;
+        top: 0;
+        bottom: 0;
+        background-color: transparent;
+    }
+    &:hover::after {
         background-color: var(--dngrid-cell-cursor-border-color);
         transition: background-color 0.5s;
     }
+}
+
+
+.dngrid-hidden {
+    visibility: hidden;
 }

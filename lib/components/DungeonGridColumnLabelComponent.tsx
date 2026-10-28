@@ -4,6 +4,9 @@ import classNames from 'classnames';
 import { extractEventHandlers } from '../util/eventListeners';
 
 export type DungeonGridColumnLabelComponentProps<ColumnKey> = {
+    // True if the column label is visible.
+    visible: boolean,
+
     // The row details.
     column: DungeonGridColumn<ColumnKey>,
 
@@ -12,10 +15,28 @@ export type DungeonGridColumnLabelComponentProps<ColumnKey> = {
 
     // The column in the grid container.
     gridColumn: number,
+
+    // True if the label is immediately above the cursor.
+    isImmediatelyAboveCursor: boolean,
+
+    // True if the label is immediately above a selected cell.
+    isImmediatelyAboveSelected: boolean,
+
+    // States the actual width of the column.
+    setActualWidth: (columnIndex: number, width: number) => void,
 }
 
 export function DungeonGridColumnLabelComponent<ColumnKey>(props: DungeonGridColumnLabelComponentProps<ColumnKey>): React.JSX.Element {
     const key: string = React.useMemo(() => `dngrid-label-column${props.columnIndex}`, [props.columnIndex]);
+    
+    const divRef = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+        console.log('Column width:', divRef.current?.offsetWidth);
+        if (divRef.current) {
+            props.setActualWidth(props.columnIndex, divRef.current.offsetWidth - 1);
+        }
+    }, [props.setActualWidth, props.columnIndex, divRef.current?.offsetWidth]);
+
     const defaultColumnLabel: string = React.useMemo(() => {
         let defaultLabel: string = '';
         let n = props.columnIndex + 1;
@@ -29,29 +50,45 @@ export function DungeonGridColumnLabelComponent<ColumnKey>(props: DungeonGridCol
 
     if (props.column.label === undefined) {
         return <div
-            key={key}
-            className="dngrid-column-label"
+            id={key}
+            ref={divRef}
+            className={classNames(
+                "dngrid-column-label",
+                (props.visible ? null : "dngrid-hidden"),
+                (props.isImmediatelyAboveCursor ? "dngrid-column-label-immediately-above-cursor" : null),
+                (props.isImmediatelyAboveSelected ? "dngrid-column-label-immediately-above-selected" : null)
+            )}
             style={{
-                gridColumn: props.gridColumn
+                gridColumn: props.gridColumn,
             }}
         >
             <span className="dngrid-column-label-inner">{defaultColumnLabel}</span>
         </div>;
     } else if (typeof props.column.label === 'string') {
         return <div 
-            key={key}
-            className="dngrid-column-label"
+            id={key}
+            ref={divRef}
+            className={classNames(
+                "dngrid-column-label",
+                (props.visible ? null : "dngrid-hidden"),
+                (props.isImmediatelyAboveCursor ? "dngrid-column-label-immediately-above-cursor" : null),
+                (props.isImmediatelyAboveSelected ? "dngrid-column-label-immediately-above-selected" : null)
+            )}
             style={{
-                gridColumn: props.gridColumn
+                gridColumn: props.gridColumn,
             }}
         >
             <span className="dngrid-column-label-inner">{props.column.label}</span>
         </div>;
     } else {
         return <div 
-            key={key}
+            id={key}
+            ref={divRef}
             className={classNames(
                 "dngrid-column-label",
+                (props.visible ? null : "dngrid-hidden"),
+                (props.isImmediatelyAboveCursor ? "dngrid-column-label-immediately-above-cursor" : null),
+                (props.isImmediatelyAboveSelected ? "dngrid-column-label-immediately-above-selected" : null),
                 props.column.label.className
             )}
             style={{
