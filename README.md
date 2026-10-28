@@ -61,6 +61,10 @@ function DungeonGridDemo(props: {
         label: {
           className: "emailHeader",
           text: "Email"
+        },
+        resizable: true,
+        onColumnResize: (width) => {
+          console.log(`You resized the email column to ${width}px!`);
         }
       },
       {
@@ -250,11 +254,25 @@ Otherwise, a configuration object for the row label.
 
 **Type:** `string | number`
 
-If a number, defines the height of the row in pixels.
+If a number, defines the default height of the row in pixels.
 
-If a string, defines the height of the row as a CSS `<track-size>` for `grid-template-rows`.
+If a string, defines the default height of the row as a CSS `<track-size>` for `grid-template-rows`.
 
 Defaults to "min-content".
+
+### resizable (optional)
+
+**Type:** `boolean`
+
+True if the row can be resized. False if the row cannot be resized.
+
+Defaults to false.
+
+### onRowResize (optional)
+
+**Type:** `(height: number) => any`
+
+Callback function for when the user finishes resizing the row.
 
 ## DungeonGridColumn\<ColumnKey> Properties
 
@@ -276,11 +294,25 @@ Otherwise, a configuration object for the column label.
 
 **Type:** `string | number`
 
-If a number, defines the width of the column in pixels.
+If a number, defines the default width of the column in pixels.
 
-If a string, defines the width of the column as a CSS `<track-size>` for `grid-template-columns`.
+If a string, defines the default width of the column as a CSS `<track-size>` for `grid-template-columns`.
 
 Defaults to "min-content".
+
+### resizable (optional)
+
+**Type:** `boolean`
+
+True if the column can be resized. False if the column cannot be resized.
+
+Defaults to false.
+
+### onColumnResize (optional)
+
+**Type:** `(height: number) => any`
+
+Callback function for when the user finishes resizing the column.
 
 ## DungeonGridCell Properties
 
