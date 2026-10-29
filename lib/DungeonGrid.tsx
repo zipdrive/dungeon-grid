@@ -228,10 +228,6 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
             return props.columns.map(({ width }, columnIndex) => typeof width === 'number' ? width : oldActualColumnWidths[columnIndex]);
         });
     }, [props.columns]);
-
-    React.useEffect(() => {
-        console.log(JSON.stringify(actualColumnWidths));
-    }, [actualColumnWidths]);
     
     const [rowLabelWidth, setRowLabelWidth] = React.useState<number | null>(null);
     const [columnHeaderHeight, setColumnHeaderHeight] = React.useState<number | null>(null);
@@ -377,7 +373,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
             e.stopPropagation();
             setCursor(({ rowIndex, columnIndex }) => {
                 for (let r = rowIndex - 1; r >= 0; --r) {
-                    if (getCellByIndex(rowIndex, columnIndex).selectable !== false) {
+                    if (getCellByIndex(r, columnIndex).selectable !== false) {
                         if (!e.shiftKey) {
                             setSelections([]);
                         }
@@ -391,7 +387,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
             e.stopPropagation();
             setCursor(({ rowIndex, columnIndex }) => {
                 for (let r = rowIndex + 1; r < props.rows.length; ++r) {
-                    if (getCellByIndex(rowIndex, columnIndex).selectable !== false) {
+                    if (getCellByIndex(r, columnIndex).selectable !== false) {
                         if (!e.shiftKey) {
                             setSelections([]);
                         }
@@ -406,7 +402,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
             e.stopPropagation();
             setCursor(({ rowIndex, columnIndex }) => {
                 for (let c = columnIndex - 1; c >= 0; --c) {
-                    if (getCellByIndex(rowIndex, columnIndex).selectable !== false) {
+                    if (getCellByIndex(rowIndex, c).selectable !== false) {
                         if (!e.shiftKey) {
                             setSelections([]);
                         }
@@ -421,7 +417,7 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
             e.stopPropagation();
             setCursor(({ rowIndex, columnIndex }) => {
                 for (let c = columnIndex + 1; c < props.columns.length; ++c) {
-                    if (getCellByIndex(rowIndex, columnIndex).selectable !== false) {
+                    if (getCellByIndex(rowIndex, c).selectable !== false) {
                         if (!e.shiftKey) {
                             setSelections([]);
                         }
@@ -445,7 +441,6 @@ export function DungeonGrid<RowKey, ColumnKey>(props: DungeonGridProps<RowKey, C
      * Copy the data from the selected cells onto the clipboard.
      */
     const onCopy = React.useCallback((e: React.ClipboardEvent) => {
-        console.log('onCopy triggered.');
         e.preventDefault();
         e.stopPropagation();
 

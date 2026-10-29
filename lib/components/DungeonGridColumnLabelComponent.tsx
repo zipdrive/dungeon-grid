@@ -31,7 +31,6 @@ export function DungeonGridColumnLabelComponent<ColumnKey>(props: DungeonGridCol
     
     const divRef = React.useRef<HTMLDivElement>(null);
     React.useEffect(() => {
-        console.log('Column width:', divRef.current?.offsetWidth);
         if (divRef.current) {
             props.setActualWidth(props.columnIndex, divRef.current.offsetWidth - 1);
         }
